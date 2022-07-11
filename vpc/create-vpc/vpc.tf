@@ -52,3 +52,19 @@ resource "aws_nat_gateway" "nat_gateway" {
         Name = "NAT-GW-1"    
     }
 }
+
+resource "aws_route_table" "public" {
+    vpc_id = aws_vpc.main.id
+
+    tags = {
+        Name = "terraform-kukim-rt-public"    
+    }
+}
+
+resource "aws_route_table" "private" {
+    vpc_id = aws_vpc.main.id
+
+    tags = {
+        Name = "terraform-kukim-rt-private"    
+    }
+}
