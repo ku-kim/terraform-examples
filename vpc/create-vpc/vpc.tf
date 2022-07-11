@@ -53,8 +53,15 @@ resource "aws_nat_gateway" "nat_gateway" {
     }
 }
 
+# inner rule 사용한 public 라우팅테이블 설정 : 게이트웨이 - public 서브넷
+## https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table
 resource "aws_route_table" "public" {
     vpc_id = aws_vpc.main.id
+
+    route {
+        cidr_block = "0.0.0.0/0"
+        gateway_id = aws_internet_gateway.igw.id
+    }
 
     tags = {
         Name = "terraform-kukim-rt-public"    
@@ -77,4 +84,14 @@ resource "aws_route_table_association" "route_table_association_public" {
 resource "aws_route_table_association" "route_table_association_private" {
     subnet_id = aws_subnet.private_subnet.id
     route_table_id = aws_route_table.private.id
+}
+
+# 바깥에서 private 라우팅테이블 설정 : NAT - private 서브넷
+## inner rule 보단 바깥으로 빼는 것이 확장성이 좋다.
+## https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route
+resource "aws_route" "private_nat" {
+
+    route_table_id = aws_route_table.private.id
+    destination_cidr_block = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat_gateway.id
 }
