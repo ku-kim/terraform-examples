@@ -18,3 +18,30 @@ resource "aws_iam_role" "hello" {
 EOF
 
 }
+
+resource "aws_iam_role_policy" "hello_s3" {
+  name   = "hello-s3-download"
+  role   = aws_iam_role.hello.id
+  policy = <<EOF
+{
+  "Statement": [
+    {
+      "Sid": "AllowAppArtifactsReadAccess",
+      "Action": [
+        "s3:GetObject"
+      ],
+      "Resource": [
+        "*"
+      ],
+      "Effect": "Allow"
+    }
+  ]
+}
+EOF
+
+}
+
+resource "aws_iam_instance_profile" "hello" {
+  name = "hello-profile"
+  role = aws_iam_role.hello.name
+}
